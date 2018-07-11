@@ -1,3 +1,4 @@
+
 '''
 /* =======================================================================
    (c) 2015, Kre8 Technology, Inc.
@@ -11,6 +12,7 @@
    ========================================================================*/
 '''
 import Tkinter as tk
+from grid_graph_display import *
 
 class GridGraph(object):
     def __init__(self):
@@ -106,6 +108,11 @@ def main():
     
     graph.make_grid()
     graph.connect_nodes()
+
+    root = tk.Tk()
+    graphDisplay = GridGraphDisplay(root, graph)
+    graphDisplay.display_graph()
+    root.mainloop()
 
     for node in graph.nodes:
         print node + " " + str(graph.nodes[node])

@@ -78,4 +78,4 @@ class GridGraphDisplay(object):
         offset = self.node_dist;
         inversion = space * self.heightInNode;
         edge = self.canvas.create_line(x1*space+offset+self.node_size/2.0, inversion - y1*space+offset+self.node_size/2.0,x2*space+offset+self.node_size/2.0,inversion - y2*space+offset+self.node_size/2.0);
-        pass
+    

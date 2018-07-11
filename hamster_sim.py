@@ -315,6 +315,7 @@ class virtual_world:
     # one of the obstacles at given pose(a,x,y)
     ######################################################################
     def in_collision(self, a, x, y):
+        
         canvas_width = self.canvas_width
         canvas_height = self.canvas_height
         pi4 = 3.1415 / 4 # quarter pi
@@ -363,18 +364,31 @@ class virtual_world:
         yq8 = (y2 + ymid4)/2
 
         for rect in self.map:
+            #print "loop self.map"
             xr1 = canvas_width + rect[0]
             yr1= canvas_height - rect[1]
             xr2= canvas_width + rect[2]
             yr2 = canvas_height - rect[3]
+        
 
-
-        def in_obstacle(self, x,y, x1, y1, x2, y2):
-            if(x > min(x1, x2) and x < max(x1, x2) and y > min(y1, y2) and y < max(y1, y2)):
+            if (self.in_obstacle(x1,y1, xr1, yr1, xr2, yr2) or self.in_obstacle(x2,y2, xr1, yr1, xr2, yr2)
+            or self.in_obstacle(x3,y3, xr1, yr1, xr2, yr2) or self.in_obstacle(x4,y4, xr1, yr1, xr2, yr2)\
+             or self.in_obstacle(xmid1,ymid1, xr1, yr1, xr2, yr2) or self.in_obstacle(xmid2,ymid2, xr1, yr1, xr2, yr2)\
+              or self.in_obstacle(xmid3,ymid3, xr1, yr1, xr2, yr2) or self.in_obstacle(xmid4,ymid4, xr1, yr1, xr2, yr2)\
+               or self.in_obstacle(xq1,yq1, xr1, yr1, xr2, yr2) or self.in_obstacle(xq2,yq2, xr1, yr1, xr2, yr2) \
+               or self.in_obstacle(xq3,yq3, xr1, yr1, xr2, yr2) or self.in_obstacle(xq4,yq4, xr1, yr1, xr2, yr2)\
+                or self.in_obstacle(xq5,yq5, xr1, yr1, xr2, yr2) or self.in_obstacle(xq6,yq6, xr1, yr1, xr2, yr2)\
+                 or self.in_obstacle(xq7,yq7, xr1, yr1, xr2, yr2) or self.in_obstacle(xq8,yq8, xr1, yr1, xr2, yr2)):   
                 return True
-            return False
-        if (in_obstacle(x1,y1, xr1, xr2, xr3, xr4) or in_obstacle(x2,y2, xr1, xr2, xr3, xr4) or in_obstacle(x3,y3, xr1, xr2, xr3, xr4) or in_obstacle(x4,y4, xr1, xr2, xr3, xr4) or in_obstacle(xmid1,ymid1, xr1, xr2, xr3, xr4) or in_obstacle(xmid2,ymid2, xr1, xr2, xr3, xr4) or in_obstacle(xmid3,ymid3, xr1, xr2, xr3, xr4) or in_obstacle(xmid4,ymid4, xr1, xr2, xr3, xr4) or in_obstacle(xq1,yq1, xr1, xr2, xr3, xr4) or in_obstacle(xq2,yq2, xr1, xr2, xr3, xr4) or in_obstacle(xq3,yq3, xr1, xr2, xr3, xr4) or in_obstacle(xq4,yq4, xr1, xr2, xr3, xr4) or in_obstacle(xq5,yq5) or in_obstacle(xq6,yq6, xr1, xr2, xr3, xr4) or in_obstacle(xq7,yq7, xr1, xr2, xr3, xr4) or in_obstacle(xq8,yq8, xr1, xr2, xr3, xr4)):
+
+        return False
+
+    def in_obstacle(self, x,y, xr1, yr1, xr2, yr2):
+        if(x >= min(xr1, xr2) and x <= max(xr1, xr2) and y >= min(yr1, yr2) and y <= max(yr1, yr2)):
             return True
+
+        return False
+        
 
 
 
