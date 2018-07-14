@@ -1,70 +1,3 @@
-#Day 2 number fix    
-def drawGrid(self, event=None):
-        print "draw Grid"
-        canvas_width = self.vWorld.canvas_width
-        canvas_height = self.vWorld.canvas_height
-        x1 = 0
-        x2 = canvas_width*2
-        y1 = 0
-        y2 = canvas_height*2
-        del_x = 40 #changed
-        del_y = 40 #changed
-        num_x = x2 / del_x
-        num_y = y2 / del_y
-        directions =[1,1,-1,-1]
-
-        # draw center (0,0)
-        self.rCanvas.create_rectangle(canvas_width-3,canvas_height-3,canvas_width+3,canvas_height+3, fill="red")
-        # horizontal grid
-        for i in range (0,num_y):
-            y = i * del_y
-            #self.rCanvas.create_text(x1,y,fill="black",text=10)
-            self.rCanvas.create_line(x1, y, x2, y, fill="yellow")
-        # verticle grid
-        for j in range (0, num_x):
-            x = j * del_x
-            self.rCanvas.create_line(x, y1, x, y2, fill="yellow")
-
-        #self.numbers(200,200)
-        n=0
-        while n < 4:
-            count=1
-            c=count+1
-            x=self.xgoal
-            y=self.ygoal
-            x3=self.xgoal
-            if(n%2==0):#vertical
-                for j in range (0, 2*canvas_height/del_y):
-                    y += directions[n]*del_y
-                    self.rCanvas.create_text(x+5,y+5,fill="black",text=count)
-                    self.numref[str(0)+","+str((j+1)*directions[n])]=count
-                    count+=1
-                    c=count
-                    x3=self.xgoal
-                    x4=self.xgoal
-                    for h in range(0, 2*canvas_width/del_x):
-                        x3+=directions[1]*del_x
-                        self.rCanvas.create_text(x3+5,y+5,fill="black",text=c)
-                        self.numref[str(h+1)+","+str(j+1)]=c
-                        x4+=directions[2]*del_x
-                        self.rCanvas.create_text(x4+5,y+5,fill="black",text=c)
-                        self.numref[str(-1*(h+1))+","+str(j+1)]=c
-                        c+=1
-            else:#horizontal
-                for i in range (0,2*canvas_width/del_x):
-                    x+=directions[n]*del_x
-                    self.rCanvas.create_text(x+5,y+5,fill="black",text=count)
-                    self.numref[str((i+1)*directions[n])+","+str(0)]=count
-                    count+=1
-            n+=1
-
-        self.rCanvas.create_text(self.xgoal+5,self.ygoal+5,fill="red",text=0)
-        self.numref[str(0)+","+str(0)]=0
-
-        print self.numref
-
-
-Day 1
 import Tkinter as tk  
 import sys
 import time  
@@ -141,10 +74,13 @@ class virtual_world:
         self.floor_dots = False
         self.localize = False
         self.glocalize = False
+        self.draw=False
+        #self.numref={}
         
     def add_obstacle(self,rect):
         self.map.append(rect)
         return
+
 
     def draw_map(self):
         canvas_width = self.canvas_width
@@ -165,6 +101,9 @@ class virtual_world:
         #     x2= canvas_width + cobs[2]
         #     y2 = canvas_height - cobs[3]
             #self.canvas.create_rectangle([x1,y1,x2,y2], fill=None)
+
+    #method checks for the next direction
+   
 
     def draw_robot(self):
         canvas_width = self.canvas_width
@@ -418,12 +357,14 @@ class GUIpart(object):
         self.xgoal=200
         self.ygoal=200
         self.numref={}
+        self.numbox={}
+        self.path=False
         self.initUI()
 
     def initUI(self):
         self.gui_root.title("Hamster Simulator")
-        canvas_width = 440 # half width
-        canvas_height = 300 # half height
+        canvas_width = 440#440 # half width
+        canvas_height = 300#300 # half height
         vRobot = self.vWorld.vrobot
         #creating the virtual appearance of the robot
         
@@ -446,9 +387,9 @@ class GUIpart(object):
         button0.pack(side='left')
         button0.bind('<Button-1>', self.drawGrid)
 
-        #button01 = tk.Button(self.gui_root,text="Numbers")
-        #button01.pack(side='left')
-        #button01.bind('<Button-1>', self.numbers)
+        button01 = tk.Button(self.gui_root,text="Go")
+        button01.pack(side='left')
+        button01.bind('<Button-1>', self.go)
 
         button1 = tk.Button(self.gui_root,text="Clear")
         button1.pack(side='left')
@@ -461,18 +402,6 @@ class GUIpart(object):
         button3 = tk.Button(self.gui_root,text="Map")
         button3.pack(side='left')
         button3.bind('<Button-1>', self.drawMap)
-
-        self.button4 = tk.Button(self.gui_root,text="Trace")
-        self.button4.pack(side='left')
-        self.button4.bind('<Button-1>', self.toggleTrace)
-
-        self.button5 = tk.Button(self.gui_root,text="Prox Dots")
-        self.button5.pack(side='left')
-        self.button5.bind('<Button-1>', self.toggleProx)
-
-        self.button6 = tk.Button(self.gui_root,text="Floor Dots")
-        self.button6.pack(side='left')
-        self.button6.bind('<Button-1>', self.toggleFloor)
 
         self.button11 = tk.Button(self.gui_root,text="Real Robot")
         self.button11.pack(side='left')
@@ -527,9 +456,7 @@ class GUIpart(object):
         # verticle grid
         for j in range (0, num_x):
             x = j * del_x
-            self.rCanvas.create_line(x, y1, x, y2, fill="yellow")
-
-        #self.numbers(200,200)
+            self.rCanvas.create_line(x, y1, x, y2, fill="yellow")       
         n=0
         while n < 4:
             count=1
@@ -538,42 +465,87 @@ class GUIpart(object):
             y=self.ygoal
             x3=self.xgoal
             if(n%2==0):#vertical
-                for j in range (0, num_y):
+                for j in range (0, 2*canvas_height/del_y):
                     y += directions[n]*del_y
-                    self.rCanvas.create_text(x+20,y+20,fill="black",text=count)
-                    self.numref[str(0)+","+str(j)]=count
+                    self.rCanvas.create_text(x+5,y+5,fill="black",text=count)
+                    self.numref[str(0)+","+str((j+1)*directions[n])]=count
                     count+=1
                     c=count
                     x3=self.xgoal
                     x4=self.xgoal
-                    for h in range(0, num_x):
+                    for h in range(0, 2*canvas_width/del_x):
                         x3+=directions[1]*del_x
-                        self.rCanvas.create_text(x3+20,y+20,fill="black",text=c)
-                        self.numref[str(h)+","+str(j)]=c
+                        self.rCanvas.create_text(x3+5,y+5,fill="black",text=c)
+                        self.numref[str(h+1)+","+str((j+1)*directions[n])]=c
                         x4+=directions[2]*del_x
-                        self.rCanvas.create_text(x4+20,y+20,fill="black",text=c)
-                        self.numref[str(-h)+","+str(j)]=c
+                        self.rCanvas.create_text(x4+5,y+5,fill="black",text=c)
+                        self.numref[str(-1*(h+1))+","+str((j+1)*directions[n])]=c
                         c+=1
             else:#horizontal
-                for i in range (0,num_x):
+                for i in range (0,2*canvas_width/del_x):
                     x+=directions[n]*del_x
-                    self.rCanvas.create_text(x+20,y+20,fill="black",text=count)
-                    self.numref[str(i)+","+str(0)]=count
+                    self.rCanvas.create_text(x+5,y+5,fill="black",text=count)
+                    self.numref[str((i+1)*directions[n])+","+str(0)]=count
                     count+=1
             n+=1
 
-        self.rCanvas.create_text(self.xgoal+20,self.ygoal+20,fill="red",text=0)
+        for obs in self.vWorld.map:
+            # rect x1,y1,x2,y2  rect5 = [0, -50, 40, 50]
+            obsx= canvas_width+obs[0]
+            obsy= canvas_height+obs[1]
+            width=obs[2]-obs[0]
+            length=40+obs[3]-obs[1]
+            wx=width/del_x
+            ly=length/del_y
+            sx=obsx/del_x
+            sy=obsy/del_y
+            x=self.xgoal
+            y=self.ygoal
+            #for i in range(sx,wx+sx):
+            #    for j in range(sy,ly+sy):
+            #        print str(i)+" "+str(j)
+            #        self.numref[str(i)+","+str(j)]=100
+                    #self.rCanvas.itemconfig(self.numbox[str(i)+","+str(j)],text=100)
+            #        print self.numref[str(i-x)+","+str(j-y)]
+            for r in range(sy-1,sy+ly+1):
+                for c in range(sx-1,wx+sx+1):
+                    self.rCanvas.create_rectangle(c*del_x,r*del_y,c*del_x+del_x,r*del_y+del_y,fill="grey")
+                    self.numref[str((c-x/del_x))+","+str(-1*(r-y/del_y))]=100
+            for i in range(sx,wx+sx):
+                for j in range(sy,ly+sy):
+                    #print str(i)+" "+str(j)
+                    self.numref[str(i-x/del_x)+","+str(-1*(j-y/del_y))]=100
+                    self.rCanvas.create_rectangle(i*del_x,j*del_y,i*del_x+del_x,j*del_y+del_y,fill="black")
+                    #print self.numref[str(i)+","+str(j)]
+        self.rCanvas.create_text(self.xgoal+5,self.ygoal+5,fill="red",text=0)
         self.numref[str(0)+","+str(0)]=0
-
+        self.vWorld.draw=True
         print self.numref
         return
+
+
+    def apf(self,event=None):
+        event=self.vWorld.event
+        cdirection=self.vWorld.cdirection
+        #if(event[2]==cdirection):
+        #    self.mo
+        #elif event[2]=='NorthWest':
+
+
+        return
+
+    def go(self,event=None):
+        self.path=True
+
+
+        return self.path
 
     def drawMap(self, event=None):
         self.vWorld.draw_map()
         return
 
     def resetvRobot(self, event=None):
-        self.vWorld.vrobot.x = 200
+        self.vWorld.vrobot.x = 220
         self.vWorld.vrobot.y = 0
         self.vWorld.vrobot.a = -1.571
         self.vWorld.goal_achieved = True
@@ -716,7 +688,54 @@ class VirtualHamsterWorld(object):
         self.vrobot = None
         self.vworld = None
         self.gQuit = False
+        self.numref={}
+        self.event=[0,0,None]
+        self.cdirection='West'
         self.create_world()
+
+    def set_numref(self,n):
+        self.numref=n
+        return
+
+    def check_box(self, currentD,x,y):
+        print "check"
+        minbox={}
+        d=[1,1,-1,-1]
+        event=""
+        nextD=[x,y]
+        c=[1,0,1,0]
+        if(self.numref[str(x)+","+str(y)]==9 and (y==0)):
+            nextD[c[0]]=1
+            nextD[c[3]]=-1
+        for i in range(0,4):
+            if i%2==0:#even number 0,2 
+                if self.numref[str(x)+","+str(y+d[i])]<self.numref[str(x)+","+str(y)]:
+                    #minbox[d[i]]=(self.numref[str(x)+","+str(y+d[i])])
+                    if d[i]==1:
+                        event+='North'
+                    else:
+                        event+='South'
+                    #nextD[c[i]]=nextD[c[i]]+d[i]
+                    nextD[c[i]]=d[i]
+            else:
+                if self.numref[str(x+d[i])+","+str(y)]<self.numref[str(x)+","+str(y)]:
+                    if d[i]==1:
+                        event+='East'
+                    else:
+                        event+='West'
+                    #nextD[c[i]]=nextD[c[i]]+d[i]
+                    nextD[c[i]]=d[i]
+        if((self.numref[str(x)+","+str(y)]==9 or self.numref[str(x)+","+str(y)]==8 or self.numref[str(x)+","+str(y)]==7 or self.numref[str(x)+","+str(y)]==6) and y==1):
+            nextD[0]=-1
+            nextD[1]=0  
+
+
+
+
+        nextD.append(event)
+        print "next Coordinate "+str(nextD)
+        return nextD
+        pass
 
     def create_world(self):       
         self.vrobot = virtual_robot()
@@ -741,16 +760,16 @@ class VirtualHamsterWorld(object):
 
         self.vworld.area = [-300,-200,300,200]
 
-        self.vworld.add_obstacle(rect1)
-        self.vworld.add_obstacle(rect2)
-        self.vworld.add_obstacle(rect3)
-        self.vworld.add_obstacle(rect4)
+        #self.vworld.add_obstacle(rect1)
+        #self.vworld.add_obstacle(rect2)
+        ##self.vworld.add_obstacle(rect3)
+        #self.vworld.add_obstacle(rect4)
         self.vworld.add_obstacle(rect5)
-        self.vworld.add_obstacle(rect6)
-        self.vworld.add_obstacle(rect7)
+        #self.vworld.add_obstacle(rect6)
+        #self.vworld.add_obstacle(rect7)
 
         # set initial pose of robot wrt robot coordinate system
-        self.vworld.vrobot.x = 200  # 200 pixels to the right from center(origin of robot coor. syst.)
+        self.vworld.vrobot.x = 220  # 200 pixels to the right from center(origin of robot coor. syst.)
         self.vworld.vrobot.y = 0
         self.vworld.vrobot.a = 1.5*3.1415    # facing west
     
@@ -793,12 +812,30 @@ class VirtualHamsterWorld(object):
             del_t = t - vrobot.t
             vrobot.t = t # update the tick
 
+            #NEW CODE FOR FINAL 
+            #check blocks
+            #goalx=self.vworld.goalx
+            #goaly=self.vworld.goaly
+            del_x = 40 #changed # same as above
+            del_y = 40 #changed
+            xcoord=1+math.trunc(round((180+vrobot.x)/del_x))
+            ycoord=3+math.trunc(round((vrobot.y-200)/del_y))
+            box = str(1+math.trunc(round((180+vrobot.x)/del_x))) +","+str(3+math.trunc(round((vrobot.y-200)/del_y)))
+            print box
+            direction='West'
+            print self.numref
+            #if self.vworld.path:
+            if self.vworld.draw:
+                self.event=self.check_box(direction,xcoord,ycoord)
+
+
+
             # compute new pose
             ms = (vrobot.sl*del_t+vrobot.sr*del_t)/2 #speed of the center
             new_vrobot_a = vrobot.a + (vrobot.sl-vrobot.sr)*del_t/b
-            new_vrobot_x = vrobot.x + ms * math.sin(vrobot.a) * d_factor
-            new_vrobot_y = vrobot.y + ms * math.cos(vrobot.a) * d_factor
-
+            new_vrobot_x = vrobot.x + ms * math.sin(vrobot.a) * d_factor + self.event[0]
+            new_vrobot_y = vrobot.y + ms * math.cos(vrobot.a) * d_factor + self.event[1]
+            #time.sleep(.1)
             ##########################
             # If in collision, Hamster should stop moving, which means no update
             # of its pose.
@@ -807,6 +844,11 @@ class VirtualHamsterWorld(object):
                 vrobot.a = new_vrobot_a
                 vrobot.x = new_vrobot_x
                 vrobot.y = new_vrobot_y
+
+
+
+
+
 
             while (vrobot.a >= 3.1415):
                 vrobot.a -= 6.283
@@ -861,8 +903,21 @@ class VirtualHamsterWorld(object):
             else:
                 vrobot.floor_r = False
 
-            time.sleep(0.05)
+            time.sleep(0.05)#.05
         return
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def main():
     global gRobotList
@@ -880,8 +935,12 @@ def main():
     t_update_world.daemon = True
     t_update_world.start()
 
+
+
     gui_handle = GUIpart(root, world_handle.vworld)
     gui_handle.draw_virtual_world()     # this method runs in main thread
+
+    world_handle.set_numref(gui_handle.numref)
 
     root.mainloop()
 
@@ -889,4 +948,8 @@ def main():
     comm.join()
 
 if __name__== "__main__":
-	sys.exit(main())
+    sys.exit(main())
+
+
+
+

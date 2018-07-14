@@ -71,8 +71,8 @@ class BehaviorThreads(object):
     ###################################
     # This function is called when border is detected
     ###################################
-    def get_out (self, robot):
-        pass
+    # def get_out (self, robot):
+    #     pass
 
     # This function monitors the sensors
     def robot_event_watcher(self, q1, q2):
